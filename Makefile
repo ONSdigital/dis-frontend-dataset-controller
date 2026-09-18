@@ -1,4 +1,5 @@
 .DEFAULT_GOAL := all
+DESIGN_SYSTEM_VERSION="73.12.0"
 
 .PHONY: all
 all: ## Show the available make targets.
@@ -61,3 +62,8 @@ megalint:  ## Run the mega-linter. Use LINTER=NAME to run only one.
 		-v $(shell pwd):/tmp/lint:rw \
 		$(if $(LINTER),-e ENABLE_LINTERS=$(LINTER),) \
 		ghcr.io/oxsecurity/megalinter:v9
+
+.PHONY: debug
+debug:
+	./scripts/load-design-system-templates.sh $(DESIGN_SYSTEM_VERSION)
+	flask --app dis_frontend_dataset_controller/flaskr run

@@ -172,3 +172,8 @@ copier_scripts/
 
 # DS_Store files
 .DS_Store
+
+# controller specific files
+/dis_frontend_dataset_controller/flaskr/static/print.css
+/dis_frontend_dataset_controller/flaskr/templates/components/
+/dis_frontend_dataset_controller/flaskr/templates/layout/
