@@ -66,4 +66,4 @@ megalint:  ## Run the mega-linter. Use LINTER=NAME to run only one.
 .PHONY: debug
 debug:
 	./scripts/load-design-system-templates.sh $(DESIGN_SYSTEM_VERSION)
-	flask --app dis_frontend_dataset_controller/flaskr run
+	flask --app dis_frontend_dataset_controller/app run

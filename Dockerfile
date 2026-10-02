@@ -1,6 +1,6 @@
 FROM python:3.14-slim
 
-ENV FLASK_APP=dis_frontend_dataset_controller.flaskr:create_app \
+ENV FLASK_APP=dis_frontend_dataset_controller.app:create_app \
     FLASK_RUN_HOST=0.0.0.0 \
     FLASK_RUN_PORT=5000 \
     PYTHONDONTWRITEBYTECODE=1 \

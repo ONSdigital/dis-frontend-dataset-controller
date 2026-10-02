@@ -26,19 +26,19 @@ TEMP_DIR=$(mktemp -d)
 curl --silent --fail -L --url "${DOWNLOAD_URL}" --output "${TEMP_DIR}/${RELEASE_NAME}"
 unzip -q -o "${TEMP_DIR}/${RELEASE_NAME}" -d .
 
-rm -rf dis_frontend_dataset_controller/flaskr/templates/components
-rm -rf dis_frontend_dataset_controller/flaskr/templates/layout
-rm -rf dis_frontend_dataset_controller/flaskr/static
-mv -f templates/* dis_frontend_dataset_controller/flaskr/templates/
+rm -rf dis_frontend_dataset_controller/app/templates/components
+rm -rf dis_frontend_dataset_controller/app/templates/layout
+rm -rf dis_frontend_dataset_controller/app/static
+mv -f templates/* dis_frontend_dataset_controller/app/templates/
 rm -rf templates
 rm -rf "$TEMP_DIR"
-echo "Saved Design System templates to 'dis_frontend_dataset_controller/flaskr/templates'"
+echo "Saved Design System templates to 'dis_frontend_dataset_controller/app/templates'"
 
 #
 # Now load the print stylesheet
 #
 CDN_URL=${CDN_URL:-"https://cdn.ons.gov.uk"}
-PRINT_STYLE_SHEET_FILE_PATH_PATH="dis_frontend_dataset_controller/flaskr/static"
+PRINT_STYLE_SHEET_FILE_PATH_PATH="dis_frontend_dataset_controller/app/static"
 
 echo "Loading print style sheets from CDN for DS Version ${TAG_NAME}"
 
