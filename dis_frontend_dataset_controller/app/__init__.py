@@ -1,7 +1,14 @@
+import asyncio
+import datetime
 import os
+import platform
+import threading
 from typing import TypedDict
 
 from flask import Flask, render_template
+
+from dis_python_healthcheck.models import Version
+from dis_python_healthcheck import HealthCheck, ExternalAPIHealthCheck, Version
 
 
 class PageConfigDict(TypedDict):
@@ -48,23 +55,23 @@ class OnsHeroDict(TypedDict):
 
 def build_hero_banner() -> OnsHeroDict:
     return {
-        "variants": 'grey',
-        "detailsColumns": '12',
-        "officialStatisticsBadge": 'true',
-        "officialStatisticsBadgeUrl": 'https://uksa.statisticsauthority.gov.uk/about-the-authority/uk-statistical-system/types-of-official-statistics/',
+        "variants": "grey",
+        "detailsColumns": "12",
+        "officialStatisticsBadge": "true",
+        "officialStatisticsBadgeUrl": "https://uksa.statisticsauthority.gov.uk/about-the-authority/uk-statistical-system/types-of-official-statistics/",
         "informationPanel":{
-            "panelText": 'Latest release',
-            "panelType": 'ons-green',
+            "panelText": "Latest release",
+            "panelType": "ons-green",
             "panelLink": {
-                "text": 'View previous releases',
-                "url": '#0',
-                "ariaLabel": 'View previous release of Retail sales rise amid summer discounts and sporting events'
+                "text": "View previous releases",
+                "url": "#0",
+                "ariaLabel": "View previous release of Retail sales rise amid summer discounts and sporting events"
             }
         },
-        "topic": 'Dataset',
-        "title": 'Dataset title goes here',
-        "text":  'Dataset description goes here',
-        "censusLogo": 'false',
+        "topic": "Dataset",
+        "title": "Dataset title goes here",
+        "text":  "Dataset description goes here",
+        "censusLogo": "false",
         "descriptionList": {
             "termCol": "5",
             "descriptionCol": "7",
@@ -132,13 +139,47 @@ def build_page_config() -> PageConfigDict:
 def create_app() -> Flask:
     # create and configure the app
     app = Flask(__name__, instance_relative_config=True)
-
     # ensure the instance folder exists
     os.makedirs(app.instance_path, exist_ok=True)
+    app.config.from_pyfile(os.path.join(app.root_path, "../config.py"))
+    build_time = datetime.datetime.fromtimestamp(
+        int(os.environ["BUILD_TIME"]),
+        tz=datetime.timezone.utc,
+    )
+
+    build_info = Version(language="python",language_version=platform.python_version(),version=os.environ["VERSION"],build_time=build_time.isoformat(),
+                    git_commit=os.environ["GIT_COMMIT"]
+                )
+
+    registry = HealthCheck(build_info)
+    api_check = ExternalAPIHealthCheck(
+        app.config['DATASET_API_URL'] + "/health",
+        "Dataset-API"
+    )
+    registry.register(
+        "Dataset-API",
+        app.config['DATASET_API_URL'] + "/health",
+        api_check.check,
+        timeout=5.0,
+        critical=False
+    )
+
+    def start_registry() -> None:
+        asyncio.run(registry.start())
+
+    t = threading.Thread(target=start_registry, daemon=True)
+    t.start()
 
     # a simple page that says hello
     @app.route("/hello")
     def hello() -> str:
-        return render_template("hello.html", pageconfig=build_page_config(),herobanner=build_hero_banner())
+        return render_template("hello.html", pageconfig=build_page_config(), herobanner=build_hero_banner())
 
+
+    @app.route("/health")
+    async def health() -> str:
+        result = await registry.run_all_checks()
+        status_code = 200 if result['status'] == 'OK' else 503
+        return result, status_code
+    
     return app

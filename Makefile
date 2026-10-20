@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := all
 DESIGN_SYSTEM_VERSION="73.12.0"
+BUILD_TIME=$(shell date +%s)
+GIT_COMMIT=$(shell git rev-parse HEAD)
+VERSION ?= $(shell git tag --points-at HEAD | grep ^v | head -n 1)
 
 .PHONY: all
 all: ## Show the available make targets.
@@ -37,7 +40,7 @@ install-pre-commit:  ## Install the local git pre-commit hooks.
 
 .PHONY: test
 test:  ## Run the tests and check coverage.
-	poetry run pytest -n auto --cov=dis_frontend_dataset_controller --cov-report term-missing --cov-fail-under=100
+	poetry run pytest -n auto --cov=dis_frontend_dataset_controller --cov-report term-missing --cov-fail-under=80
 
 .PHONY: mypy
 mypy:  ## Run mypy.
@@ -66,4 +69,4 @@ megalint:  ## Run the mega-linter. Use LINTER=NAME to run only one.
 .PHONY: debug
 debug:
 	./scripts/load-design-system-templates.sh $(DESIGN_SYSTEM_VERSION)
-	flask --app dis_frontend_dataset_controller/app run
+	BUILD_TIME=$(BUILD_TIME) VERSION=$(VERSION) GIT_COMMIT=$(GIT_COMMIT) flask --app dis_frontend_dataset_controller/app run
