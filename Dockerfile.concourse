@@ -1,0 +1,11 @@
+# syntax=docker/dockerfile:1
+
+# The value of ECR_REPOSITORY_URI will be substituted by the Concourse build
+FROM {{ECR_REPOSITORY_URI}}/python
+
+# Set destination for COPY
+WORKDIR /app/
+
+ADD dis-frontend-dataset-controller .
+
+CMD ./dis-frontend-dataset-controller
