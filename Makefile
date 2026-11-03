@@ -39,7 +39,7 @@ install-pre-commit:  ## Install the local git pre-commit hooks.
 	poetry run pre-commit install
 
 .PHONY: test
-test:  ## Run the tests and check coverage.
+test: templates  ## Run the tests and check coverage.
 	poetry run pytest -n auto --cov=dis_frontend_dataset_controller --cov-report term-missing --cov-fail-under=80
 
 .PHONY: mypy
@@ -66,7 +66,10 @@ megalint:  ## Run the mega-linter. Use LINTER=NAME to run only one.
 		$(if $(LINTER),-e ENABLE_LINTERS=$(LINTER),) \
 		ghcr.io/oxsecurity/megalinter:v10
 
-.PHONY: debug
-debug:
+.PHONY: templates
+templates:  ## Download Design System templates and styles.
 	./scripts/load-design-system-templates.sh $(DESIGN_SYSTEM_VERSION)
+
+.PHONY: debug
+debug: templates
 	BUILD_TIME=$(BUILD_TIME) VERSION=$(VERSION) GIT_COMMIT=$(GIT_COMMIT) flask --app dis_frontend_dataset_controller/app run
