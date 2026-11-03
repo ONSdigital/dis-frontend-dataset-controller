@@ -3,12 +3,10 @@ import datetime
 import os
 import platform
 import threading
-from typing import TypedDict
+from typing import Any, TypedDict
 
+from dis_python_healthcheck import ExternalAPIHealthCheck, HealthCheck, Version
 from flask import Flask, render_template
-
-from dis_python_healthcheck.models import Version
-from dis_python_healthcheck import HealthCheck, ExternalAPIHealthCheck, Version
 
 
 class PageConfigDict(TypedDict):
@@ -19,27 +17,33 @@ class PageConfigDict(TypedDict):
     meta: dict
     footer: dict
 
+
 class PanelLinkDict(TypedDict):
     text: str
     url: str
     ariaLabel: str
+
 
 class PanelDict(TypedDict):
     panelText: str
     panelType: str
     panelLink: PanelLinkDict
 
+
 class DescriptionListDict(TypedDict):
     termCol: str
     descriptionCol: str
     itemsList: list[ItemDict]
 
+
 class ItemDict(TypedDict):
     term: str
     descriptions: list[DescriptionDict]
 
+
 class DescriptionDict(TypedDict):
     description: str
+
 
 class OnsHeroDict(TypedDict):
     variants: str
@@ -57,52 +61,31 @@ def build_hero_banner() -> OnsHeroDict:
     return {
         "variants": "grey",
         "detailsColumns": "12",
-        "officialStatisticsBadge": "true",
+        "officialStatisticsBadge": True,
         "officialStatisticsBadgeUrl": "https://uksa.statisticsauthority.gov.uk/about-the-authority/uk-statistical-system/types-of-official-statistics/",
-        "informationPanel":{
+        "informationPanel": {
             "panelText": "Latest release",
             "panelType": "ons-green",
             "panelLink": {
                 "text": "View previous releases",
                 "url": "#0",
-                "ariaLabel": "View previous release of Retail sales rise amid summer discounts and sporting events"
-            }
+                "ariaLabel": "View previous release of Retail sales rise amid summer discounts and sporting events",
+            },
         },
         "topic": "Dataset",
         "title": "Dataset title goes here",
-        "text":  "Dataset description goes here",
-        "censusLogo": "false",
+        "text": "Dataset description goes here",
         "descriptionList": {
             "termCol": "5",
             "descriptionCol": "7",
             "itemsList": [
-                {
-                    "term": "Released:",
-                    "descriptions": [
-                        {
-                            "description": "16 August 2024"
-                        }
-                    ]
-                },
-                {
-                    "term": "Last Updated:",
-                    "descriptions": [
-                        {
-                            "description": "20 September 2024"
-                        }
-                    ]
-                },
-                {
-                    "term": "Version:",
-                    "descriptions": [
-                        {
-                            "description": "1"
-                        }
-                    ]
-                }
-            ]
-        }
+                {"term": "Released:", "descriptions": [{"description": "16 August 2024"}]},
+                {"term": "Last Updated:", "descriptions": [{"description": "20 September 2024"}]},
+                {"term": "Version:", "descriptions": [{"description": "1"}]},
+            ],
+        },
     }
+
 
 def build_page_config() -> PageConfigDict:
     return {
@@ -144,24 +127,21 @@ def create_app() -> Flask:
     app.config.from_pyfile(os.path.join(app.root_path, "../config.py"))
     build_time = datetime.datetime.fromtimestamp(
         int(os.environ["BUILD_TIME"]),
-        tz=datetime.timezone.utc,
+        tz=datetime.UTC,
     )
 
-    build_info = Version(language="python",language_version=platform.python_version(),version=os.environ["VERSION"],build_time=build_time.isoformat(),
-                    git_commit=os.environ["GIT_COMMIT"]
-                )
+    build_info = Version(
+        language="python",
+        language_version=platform.python_version(),
+        version=os.environ["VERSION"],
+        build_time=build_time.isoformat(),
+        git_commit=os.environ["GIT_COMMIT"],
+    )
 
     registry = HealthCheck(build_info)
-    api_check = ExternalAPIHealthCheck(
-        app.config['DATASET_API_URL'] + "/health",
-        "Dataset-API"
-    )
+    api_check = ExternalAPIHealthCheck(app.config["DATASET_API_URL"] + "/health", "Dataset-API")
     registry.register(
-        "Dataset-API",
-        app.config['DATASET_API_URL'] + "/health",
-        api_check.check,
-        timeout=5.0,
-        critical=False
+        "Dataset-API", app.config["DATASET_API_URL"] + "/health", api_check.check, timeout=5.0, critical=False
     )
 
     def start_registry() -> None:
@@ -175,11 +155,10 @@ def create_app() -> Flask:
     def hello() -> str:
         return render_template("hello.html", pageconfig=build_page_config(), herobanner=build_hero_banner())
 
-
     @app.route("/health")
-    async def health() -> str:
+    async def health() -> tuple[Any, int]:
         result = await registry.run_all_checks()
-        status_code = 200 if result['status'] == 'OK' else 503
+        status_code = 200 if result["status"] == "ok" else 503
         return result, status_code
-    
+
     return app

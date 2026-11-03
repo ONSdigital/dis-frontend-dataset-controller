@@ -1,7 +1,9 @@
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from types import SimpleNamespace
 
 import dis_frontend_dataset_controller.app as app_module
+
+STATUS_OK = 200
 
 
 def test_hello_and_build_metadata(monkeypatch):
@@ -33,8 +35,8 @@ def test_hello_and_build_metadata(monkeypatch):
     client = app_module.create_app().test_client()
 
     response = client.get("/hello")
-    assert response.status_code == 200
+    assert response.status_code == STATUS_OK
 
     build_info = captured["build_info"]
-    expected = datetime.fromtimestamp(int(build_time), tz=timezone.utc)
+    expected = datetime.fromtimestamp(int(build_time), tz=UTC)
     assert datetime.fromisoformat(build_info.build_time) == expected
