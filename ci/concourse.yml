@@ -13,10 +13,10 @@ helm:
       # Temporarily disabled while we deploy some featur/spike branches to bleed for testing.
       # Once the testing is complete, we will revert to the original configuration.
       # TODO: Revert once feature/spike branch testing is complete.
-      #      - values/dis-bleed-internal.yaml
-      #      - values/dis-bleed-external.yaml
-      - values/dis-sandbox-internal.yaml
-      - values/dis-sandbox-external.yaml
+      - values/dis-bleed-internal.yaml
+      - values/dis-bleed-external.yaml
+      # - values/dis-sandbox-internal.yaml
+      # - values/dis-sandbox-external.yaml
     staging:
       - values/dis-staging-internal.yaml
       - values/dis-staging-external.yaml
