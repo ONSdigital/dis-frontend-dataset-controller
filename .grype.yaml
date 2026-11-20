@@ -1,0 +1,23 @@
+# Grype vulnerability scanner configuration
+
+# Fail on high severity or above
+fail-on-severity: "high"
+
+# Database configuration for handling CI environments and internal repos
+db:
+  # Auto-update the vulnerability database
+  auto-update: true
+
+  # Set max allowed age to 240 hours (10 days) to handle CI failures gracefully
+  # GitHub Actions runners may have network issues downloading the latest DB
+  max-allowed-built-age: "240h"
+
+  # Validate age of database - set to false to use older database if new one unavailable
+  # This prevents CI failures when database updates fail
+  validate-age: false
+
+# Ignore known false positives and disputed CVEs
+ignore:
+  # CVE-2018-20225 - Disputed and unwarranted, causes Megalinter to fail
+  # @link https://nvd.nist.gov/vuln/detail/CVE-2018-20225
+  - vulnerability: CVE-2018-20225
