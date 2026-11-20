@@ -64,7 +64,7 @@ megalint:  ## Run the mega-linter. Use LINTER=NAME to run only one.
 		-v /var/run/docker.sock:/var/run/docker.sock:rw \
 		-v $(shell pwd):/tmp/lint:rw \
 		$(if $(LINTER),-e ENABLE_LINTERS=$(LINTER),) \
-		ghcr.io/oxsecurity/megalinter:v10
+		ghcr.io/oxsecurity/megalinter-cupcake@sha256:0e62d95de2e4388530579e1cdf531e3752ac70549ab78666c64429bd734dbae7 # v10.2.0
 
 .PHONY: templates
 templates:  ## Download Design System templates and styles.
