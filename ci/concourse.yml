@@ -4,7 +4,7 @@ application:
 helm:
   repo_name: dis-helm-dataset-catalogue-service-chart
   values_files:
-    image_tag_key: tag
+    image_tag_key: dis-frontend-dataset-controller.image.tag
     sandbox:
       # At the moment, the “sandbox” trigger is actually driven by merges to main,
       # so we intentionally update both bleed and sandbox configuration together.
