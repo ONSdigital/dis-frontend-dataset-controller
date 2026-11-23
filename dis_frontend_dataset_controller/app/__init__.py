@@ -150,7 +150,7 @@ def create_app() -> Flask:
     t = threading.Thread(target=start_registry, daemon=True)
     t.start()
 
-    # a simple page that says hello
+    # a simple page that says hello - just a test for now
     @app.route("/hello")
     def hello() -> str:
         return render_template("hello.html", pageconfig=build_page_config(), herobanner=build_hero_banner())
